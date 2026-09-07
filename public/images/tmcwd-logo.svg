@@ -1,0 +1,57 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 80" width="220" height="80">
+  <!-- Background (transparent) -->
+
+  <!-- Water drop icon -->
+  <g transform="translate(10, 8)">
+    <!-- Drop shape -->
+    <path d="M32 6 C32 6 14 28 14 42 a18 18 0 0 0 36 0 C50 28 32 6 32 6 Z"
+          fill="#1d4ed8" opacity="0.9"/>
+    <!-- Highlight on drop -->
+    <path d="M32 14 C32 14 22 30 22 40 a8 8 0 0 0 8 7"
+          fill="none" stroke="white" stroke-width="2.5"
+          stroke-linecap="round" opacity="0.5"/>
+    <!-- Wave lines inside drop -->
+    <path d="M22 44 Q27 40 32 44 Q37 48 42 44"
+          fill="none" stroke="white" stroke-width="1.8"
+          stroke-linecap="round" opacity="0.7"/>
+    <path d="M24 50 Q29 46 34 50 Q39 54 44 50"
+          fill="none" stroke="white" stroke-width="1.8"
+          stroke-linecap="round" opacity="0.5"/>
+  </g>
+
+  <!-- Organization name -->
+  <text x="72" y="28"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="13.5"
+        font-weight="700"
+        fill="#1e3a8a"
+        letter-spacing="0.5">TMCWD</text>
+
+  <!-- Full name line 1 -->
+  <text x="72" y="45"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="8.5"
+        fill="#3b82f6"
+        letter-spacing="0.2">Trece Martires City</text>
+
+  <!-- Full name line 2 -->
+  <text x="72" y="57"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="8.5"
+        fill="#3b82f6"
+        letter-spacing="0.2">Water District</text>
+
+  <!-- Divider line -->
+  <line x1="68" y1="14" x2="68" y2="66"
+        stroke="#bfdbfe" stroke-width="1.5"/>
+
+  <!-- IT Service label -->
+  <rect x="72" y="62" width="88" height="12" rx="3" fill="#eff6ff"/>
+  <text x="116" y="71.5"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="7.5"
+        font-weight="600"
+        fill="#1d4ed8"
+        text-anchor="middle"
+        letter-spacing="0.8">IT REQUEST SERVICE</text>
+</svg>

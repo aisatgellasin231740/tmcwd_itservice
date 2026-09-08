@@ -80,10 +80,10 @@
                 {{-- Priority guide --}}
                 <div class="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 text-xs text-blue-700 space-y-1">
                     <p class="font-semibold">Priority Guide:</p>
-                    <p>🔴 <strong>Urgent</strong> — System completely down, cannot work (e.g. Billing system, SCADA) — SLA: 2 hours</p>
-                    <p>🟠 <strong>High</strong> — Major disruption, most staff affected — SLA: 8 hours</p>
-                    <p>🟡 <strong>Medium</strong> — Partial disruption, workaround available — SLA: 2 days</p>
-                    <p>🔵 <strong>Low</strong> — Minor issue or non-urgent request — SLA: 5 days</p>
+                    <p><strong>[Urgent]</strong> — System completely down, cannot work (e.g. Billing system, SCADA) — SLA: 2 hours</p>
+                    <p><strong>[High]</strong> — Major disruption, most staff affected — SLA: 8 hours</p>
+                    <p><strong>[Medium]</strong> — Partial disruption, workaround available — SLA: 2 days</p>
+                    <p><strong>[Low]</strong> — Minor issue or non-urgent request — SLA: 5 days</p>
                 </div>
 
                 {{-- Description --}}

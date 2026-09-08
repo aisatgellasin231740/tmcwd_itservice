@@ -9,6 +9,7 @@ class Attachment extends Model
 {
     protected $fillable = [
         'ticket_id',
+        'comment_id',
         'user_id',
         'original_name',
         'stored_path',
@@ -21,6 +22,11 @@ class Attachment extends Model
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class);
+    }
+
+    public function comment(): BelongsTo
+    {
+        return $this->belongsTo(Comment::class);
     }
 
     public function user(): BelongsTo

@@ -16,11 +16,11 @@
             default    => 'sla-ok',
         };
         $icon = match($status) {
-            'breached' => '🔴',
-            'warning'  => '⚠️',
-            'paused'   => '⏸',
-            'met'      => '✅',
-            default    => '🟢',
+            'breached' => '●',
+            'warning'  => '▲',
+            'paused'   => '❙❙',
+            'met'      => '✓',
+            default    => '●',
         };
     @endphp
     <span class="badge {{ $classes }} text-xs" title="SLA: {{ $ticket->sla_due_at?->format('M d, Y H:i') ?? 'N/A' }}">

@@ -80,6 +80,7 @@ class TicketController extends Controller
             'attachments.user',
             'activities.user',
             'comments.user',
+            'comments.attachments',
         ]);
 
         $agents = User::role(['it_staff', 'it_head'])->where('is_active', true)->orderBy('name')->get();
@@ -98,6 +99,10 @@ class TicketController extends Controller
         }
 
         if (array_key_exists('assigned_to', $data)) {
+            // IT Staff can only assign to themselves — IT Head can assign to anyone
+            if ($request->user()->hasRole('it_staff') && ! empty($data['assigned_to'])) {
+                $data['assigned_to'] = $request->user()->id;
+            }
             $this->ticketService->assign($ticket, $data['assigned_to'], $request->user());
         }
 
@@ -131,7 +136,8 @@ class TicketController extends Controller
             $ticket,
             $request->user(),
             $request->validated('body'),
-            $isInternal
+            $isInternal,
+            $request->hasFile('attachments') ? $request->file('attachments') : []
         );
 
         return back()->with('success', $isInternal ? 'Internal note added.' : 'Reply sent.');

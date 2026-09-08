@@ -20,19 +20,26 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    // throttle:5,1 = max 5 attempts per 1 minute per IP (route-level guard,
+    // in addition to the LoginRequest rate limiter which tracks email+IP)
+    Route::post('login', [AuthenticatedSessionController::class, 'store'])
+        ->middleware('throttle:5,1');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
+    // throttle:3,1 = max 3 password reset requests per minute (prevents email flooding)
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email');
+        ->name('password.email')
+        ->middleware('throttle:3,1');
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 
+    // throttle:5,1 on the reset submission as well
     Route::post('reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.store');
+        ->name('password.store')
+        ->middleware('throttle:5,1');
 });
 
 Route::middleware('auth')->group(function () {
@@ -56,4 +63,13 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+
+    // ── Mandatory password change (exempt from RequirePasswordChange middleware) ──
+    Route::get('password/change-required',
+        [\App\Http\Controllers\Auth\ForcePasswordChangeController::class, 'show'])
+        ->name('password.force-change');
+
+    Route::post('password/change-required',
+        [\App\Http\Controllers\Auth\ForcePasswordChangeController::class, 'update'])
+        ->name('password.force-change.update');
 });

@@ -86,10 +86,20 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         Route::get('/reports',            [Admin\ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export-csv', [Admin\ReportController::class, 'exportCsv'])->name('reports.csv');
         Route::get('/reports/export-pdf', [Admin\ReportController::class, 'exportPdf'])->name('reports.pdf');
+
+        // Activity Log (Audit)
+        Route::get('/activity-log',            [Admin\ActivityLogController::class, 'index'])->name('activity.index');
+        Route::get('/activity-log/export-csv', [Admin\ActivityLogController::class, 'exportCsv'])->name('activity.csv');
+        Route::get('/activity-log/export-pdf', [Admin\ActivityLogController::class, 'exportPdf'])->name('activity.pdf');
     });
 
     // ── Search ─────────────────────────────────────────────────────────────
     Route::get('/search', \App\Http\Controllers\SearchController::class)->name('search');
+
+    // ── Bulk Actions ───────────────────────────────────────────────────────
+    Route::post('/tickets/bulk', [\App\Http\Controllers\BulkTicketController::class, 'apply'])
+         ->name('tickets.bulk')
+         ->middleware('role:it_staff|it_head');
 
     // ── Shared ─────────────────────────────────────────────────────────────
     Route::get('/attachments/{attachment}', [AttachmentController::class, 'download'])->name('attachments.download');

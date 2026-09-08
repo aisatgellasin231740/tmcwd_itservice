@@ -6,6 +6,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Login Rate Limiting
+    |--------------------------------------------------------------------------
+    |
+    | Maximum failed login attempts before an account/IP is locked out.
+    |
+    | login_max_attempts     — per email+IP combination (default: 5 per 60s)
+    | login_max_attempts_ip  — per IP across all accounts (default: 20 per 120s)
+    |
+    | You can override these in .env using LOGIN_MAX_ATTEMPTS and
+    | LOGIN_MAX_ATTEMPTS_IP if you need to adjust for your environment.
+    |
+    */
+
+    'login_max_attempts'    => env('LOGIN_MAX_ATTEMPTS', 5),
+    'login_max_attempts_ip' => env('LOGIN_MAX_ATTEMPTS_IP', 20),
+
+    /*
+    |--------------------------------------------------------------------------
     | Authentication Defaults
     |--------------------------------------------------------------------------
     |

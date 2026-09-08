@@ -107,3 +107,45 @@
     .sla-paused  { @apply text-gray-600 bg-gray-50 border border-gray-200; }
     .sla-met     { @apply text-green-700 bg-green-50 border border-green-200; }
 }
+
+/* ── Dark Mode overrides (plain CSS — no @apply to avoid circular deps) ─── */
+.dark body                            { background-color: #111827; color: #f3f4f6; }
+.dark .card                           { background-color: #1f2937; border-color: #374151; }
+.dark .card-header                    { border-color: #374151; }
+.dark .card-body                      { color: #e5e7eb; }
+.dark .data-table                     { background-color: #1f2937; }
+.dark .data-table thead               { background-color: #111827; }
+.dark .data-table th                  { color: #9ca3af; background-color: #111827; }
+.dark .data-table td                  { color: #d1d5db; border-color: #374151; }
+.dark .data-table tbody tr:hover td   { background-color: rgba(55,65,81,0.5); }
+.dark .table-wrapper                  { border-color: #374151; }
+.dark .form-input,
+.dark .form-select,
+.dark .form-textarea                  { background-color: #374151; border-color: #4b5563; color: #f3f4f6; }
+.dark .form-input::placeholder,
+.dark .form-textarea::placeholder     { color: #9ca3af; }
+.dark .form-label                     { color: #d1d5db; }
+.dark .btn-secondary                  { background-color: #374151; border-color: #4b5563; color: #e5e7eb; }
+.dark .btn-secondary:hover            { background-color: #4b5563; }
+.dark aside                           { background-color: #111827; border-color: #374151; }
+.dark .nav-item                       { color: #9ca3af; }
+.dark .nav-item:hover                 { background-color: #374151; color: #60a5fa; }
+.dark .nav-item.active                { background-color: #2563eb; color: #ffffff; }
+.dark .nav-section                    { color: #6b7280; }
+.dark main                            { background-color: #111827; }
+.dark h1, .dark h2, .dark h3         { color: #f3f4f6; }
+.dark .bg-white                       { background-color: #1f2937 !important; }
+.dark .bg-gray-50                     { background-color: #1f2937; }
+.dark .bg-gray-100                    { background-color: #374151; }
+.dark .border-gray-100,
+.dark .border-gray-200                { border-color: #374151; }
+/* Bottom nav dark mode */
+.dark nav.fixed.bottom-0              { background-color: #111827; border-color: #374151; }
+.dark nav.fixed.bottom-0 a           { color: #9ca3af; }
+.dark nav.fixed.bottom-0 a:hover     { color: #60a5fa; }
+/* Badges */
+.dark .badge                          { opacity: 0.9; }
+/* Dark backgrounds for utility overrides */
+.dark .text-gray-800                  { color: #e5e7eb !important; }
+.dark .text-gray-700                  { color: #d1d5db !important; }
+.dark .text-gray-600                  { color: #9ca3af !important; }

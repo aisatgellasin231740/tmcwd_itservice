@@ -78,6 +78,7 @@
                                 : ($isOwn ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800') }}">
                             {{ $comment->body }}
                         </div>
+                        @include('partials.comment-attachments', ['comment' => $comment])
                     </div>
                 </div>
                 @empty
@@ -87,26 +88,44 @@
 
             {{-- Add Comment Form --}}
             <div class="px-6 pb-6 pt-3 border-t border-gray-100" x-data="{ type: 'public' }">
-                <form method="POST" action="{{ route('agent.tickets.comments.store', $ticket) }}">
+                <form method="POST" action="{{ route('agent.tickets.comments.store', $ticket) }}"
+                      enctype="multipart/form-data">
                     @csrf
                     <div class="flex gap-2 mb-3">
                         <button type="button" @click="type='public'"
                                 :class="type==='public' ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'">
-                            💬 Public Reply
+                            Public Reply
                         </button>
                         <button type="button" @click="type='internal'"
                                 :class="type==='internal' ? 'bg-orange-500 text-white px-3 py-1.5 text-xs font-medium rounded-lg' : 'btn-secondary btn-sm'">
-                            🔒 Internal Note
+                            Internal Note
                         </button>
                     </div>
                     <input type="hidden" name="is_internal" :value="type === 'internal' ? '1' : '0'">
                     <p x-show="type==='internal'" class="text-xs text-orange-600 mb-2 flex items-center gap-1">
-                        <span>⚠️</span> Internal notes are only visible to IT staff.
+                        Internal notes are only visible to IT staff.
                     </p>
                     <textarea name="body" rows="3"
                               :placeholder="type==='internal' ? 'Add an internal note for IT staff only...' : 'Write a reply to the requester...'"
                               class="form-textarea mb-2 @error('body') border-red-400 @enderror">{{ old('body') }}</textarea>
                     @error('body')<p class="form-error">{{ $message }}</p>@enderror
+
+                    {{-- File attachments --}}
+                    <div class="mb-2" x-data="{ files: [] }">
+                        <label class="block text-xs text-gray-500 mb-1">Attach files (optional)</label>
+                        <input type="file" name="attachments[]" multiple
+                               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+                               @change="files = Array.from($event.target.files)"
+                               class="text-xs text-gray-600 file:mr-2 file:py-1 file:px-3 file:rounded-lg
+                                      file:border file:border-gray-300 file:text-xs file:bg-white
+                                      file:text-gray-700 hover:file:bg-gray-50">
+                        <ul x-show="files.length" class="mt-1 space-y-0.5">
+                            <template x-for="f in files" :key="f.name">
+                                <li class="text-[11px] text-gray-500" x-text="f.name"></li>
+                            </template>
+                        </ul>
+                    </div>
+
                     <button type="submit"
                             :class="type==='internal' ? 'bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 text-sm font-medium rounded-lg' : 'btn-primary'"
                             x-text="type==='internal' ? 'Save Internal Note' : 'Send Reply'">
@@ -136,7 +155,8 @@
                     </div>
                 </form>
 
-                {{-- Assign --}}
+                {{-- Assign To — IT Head sees full dropdown, IT Staff can only self-assign --}}
+                @if(auth()->user()->hasRole('it_head'))
                 <form method="POST" action="{{ route('agent.tickets.update', $ticket) }}">
                     @csrf @method('PATCH')
                     <label class="form-label">Assign To</label>
@@ -145,13 +165,35 @@
                             <option value="">Unassigned</option>
                             @foreach($agents as $agent)
                                 <option value="{{ $agent->id }}" {{ $ticket->assigned_to===$agent->id?'selected':'' }}>
-                                    {{ $agent->name }}{{ $agent->id === auth()->id() ? ' (me)' : '' }}
+                                    {{ $agent->name }}
+                                    @if($agent->hasRole('it_head')) (IT Head) @else (IT Staff) @endif
+                                    {{ $agent->id === auth()->id() ? '— Me' : '' }}
                                 </option>
                             @endforeach
                         </select>
                         <button type="submit" class="btn-primary btn-sm shrink-0">Assign</button>
                     </div>
                 </form>
+                @else
+                {{-- IT Staff can only assign to themselves --}}
+                @if($ticket->assigned_to !== auth()->id())
+                <form method="POST" action="{{ route('agent.tickets.update', $ticket) }}">
+                    @csrf @method('PATCH')
+                    <input type="hidden" name="assigned_to" value="{{ auth()->id() }}">
+                    <input type="hidden" name="_from" value="self">
+                    <button type="submit" class="btn-primary w-full justify-center">
+                        Assign to Me
+                    </button>
+                </form>
+                @else
+                <div class="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Assigned to you
+                </div>
+                @endif
+                @endif
             </div>
         </div>
 

@@ -84,6 +84,7 @@
                                 : ($isOwn ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800') }}">
                             {{ $comment->body }}
                         </div>
+                        @include('partials.comment-attachments', ['comment' => $comment])
                     </div>
                 </div>
                 @empty
@@ -91,18 +92,33 @@
                 @endforelse
             </div>
             <div class="px-6 pb-6 pt-3 border-t border-gray-100" x-data="{ type: 'public' }">
-                <form method="POST" action="{{ route('admin.tickets.comments.store', $ticket) }}">
+                <form method="POST" action="{{ route('admin.tickets.comments.store', $ticket) }}"
+                      enctype="multipart/form-data">
                     @csrf
                     <div class="flex gap-2 mb-3">
                         <button type="button" @click="type='public'"
-                                :class="type==='public' ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'">💬 Public Reply</button>
+                                :class="type==='public' ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'">Public Reply</button>
                         <button type="button" @click="type='internal'"
-                                :class="type==='internal' ? 'bg-orange-500 text-white px-3 py-1.5 text-xs font-medium rounded-lg' : 'btn-secondary btn-sm'">🔒 Internal Note</button>
+                                :class="type==='internal' ? 'bg-orange-500 text-white px-3 py-1.5 text-xs font-medium rounded-lg' : 'btn-secondary btn-sm'">Internal Note</button>
                     </div>
                     <input type="hidden" name="is_internal" :value="type==='internal'?'1':'0'">
                     <textarea name="body" rows="3"
                               :placeholder="type==='internal' ? 'Add an internal note...' : 'Write a reply...'"
                               class="form-textarea mb-2"></textarea>
+                    <div class="mb-2" x-data="{ files: [] }">
+                        <label class="block text-xs text-gray-500 mb-1">Attach files (optional)</label>
+                        <input type="file" name="attachments[]" multiple
+                               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+                               @change="files = Array.from($event.target.files)"
+                               class="text-xs text-gray-600 file:mr-2 file:py-1 file:px-3 file:rounded-lg
+                                      file:border file:border-gray-300 file:text-xs file:bg-white
+                                      file:text-gray-700 hover:file:bg-gray-50">
+                        <ul x-show="files.length" class="mt-1 space-y-0.5">
+                            <template x-for="f in files" :key="f.name">
+                                <li class="text-[11px] text-gray-500" x-text="f.name"></li>
+                            </template>
+                        </ul>
+                    </div>
                     <button type="submit"
                             :class="type==='internal' ? 'bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 text-sm font-medium rounded-lg' : 'btn-primary'"
                             x-text="type==='internal' ? 'Save Note' : 'Send Reply'"></button>
@@ -135,7 +151,11 @@
                         <select name="assigned_to" class="form-select flex-1">
                             <option value="">Unassigned</option>
                             @foreach($agents as $ag)
-                                <option value="{{ $ag->id }}" {{ $ticket->assigned_to===$ag->id?'selected':'' }}>{{ $ag->name }}</option>
+                                <option value="{{ $ag->id }}" {{ $ticket->assigned_to===$ag->id?'selected':'' }}>
+                                    {{ $ag->name }}
+                                    @if($ag->hasRole('it_head')) (IT Head) @else (IT Staff) @endif
+                                    {{ $ag->id === auth()->id() ? '— Me' : '' }}
+                                </option>
                             @endforeach
                         </select>
                         <button type="submit" class="btn-primary btn-sm shrink-0">Save</button>

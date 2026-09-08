@@ -57,6 +57,7 @@ class TicketController extends Controller
             'attachments.user',
             'activities.user',
             'comments.user',
+            'comments.attachments',
         ]);
 
         $agents      = User::role(['it_staff', 'it_head'])->where('is_active', true)->orderBy('name')->get();
@@ -101,7 +102,8 @@ class TicketController extends Controller
             $ticket,
             $request->user(),
             $request->validated('body'),
-            $isInternal
+            $isInternal,
+            $request->hasFile('attachments') ? $request->file('attachments') : []
         );
 
         return back()->with('success', $isInternal ? 'Internal note added.' : 'Reply sent.');

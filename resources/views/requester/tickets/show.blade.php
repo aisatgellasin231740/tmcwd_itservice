@@ -72,6 +72,7 @@
                             {{ $isOwn ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800' }}">
                             {{ $comment->body }}
                         </div>
+                        @include('partials.comment-attachments', ['comment' => $comment])
                     </div>
                 </div>
                 @empty
@@ -82,13 +83,38 @@
             {{-- Reply form --}}
             @if(!$ticket->isClosed())
             <div class="px-6 pb-6 pt-2 border-t border-gray-100">
-                <form method="POST" action="{{ route('requester.tickets.comments.store', $ticket) }}">
+                <form method="POST" action="{{ route('requester.tickets.comments.store', $ticket) }}"
+                      enctype="multipart/form-data">
                     @csrf
                     <label class="form-label">Add a Reply</label>
                     <textarea name="body" rows="3"
                               placeholder="Add a comment or update..."
                               class="form-textarea @error('body') border-red-400 @enderror mb-2">{{ old('body') }}</textarea>
                     @error('body')<p class="form-error">{{ $message }}</p>@enderror
+
+                    {{-- File attachment --}}
+                    <div class="mb-3" x-data="{ files: [] }">
+                        <label class="block text-xs text-gray-500 mb-1">
+                            Attach files (optional — max 10 MB each)
+                        </label>
+                        <input type="file" name="attachments[]" multiple
+                               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+                               @change="files = Array.from($event.target.files)"
+                               class="text-xs text-gray-600 file:mr-2 file:py-1 file:px-3 file:rounded-lg
+                                      file:border file:border-gray-300 file:text-xs file:bg-white
+                                      file:text-gray-700 hover:file:bg-gray-50">
+                        <ul x-show="files.length" class="mt-1 space-y-0.5">
+                            <template x-for="f in files" :key="f.name">
+                                <li class="text-[11px] text-gray-500 flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
+                                    </svg>
+                                    <span x-text="f.name"></span>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+
                     <button type="submit" class="btn-primary btn-sm">Send Reply</button>
                 </form>
             </div>

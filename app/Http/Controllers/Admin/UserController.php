@@ -31,6 +31,8 @@ class UserController extends Controller
         $data        = $request->validated();
         $role        = $data['role'];
         $data['is_active'] = $request->boolean('is_active', true);
+        // All new accounts created by admin must change their password on first login
+        $data['must_change_password'] = true;
         unset($data['role'], $data['password_confirmation']);
 
         $user = User::create($data);

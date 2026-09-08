@@ -54,7 +54,7 @@ class TicketPolicy
         return $user->hasAnyRole(['it_head', 'it_staff']);
     }
 
-    /** Only agents and admins can assign tickets */
+    /** IT Head can assign to anyone. IT Staff can only self-assign (enforced in controller). */
     public function assign(User $user, Ticket $ticket): bool
     {
         return $user->hasAnyRole(['it_head', 'it_staff']);

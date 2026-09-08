@@ -72,8 +72,8 @@ class TicketController extends Controller
             'activities.user',
         ]);
 
-        // Requesters only see public comments
-        $comments = $ticket->publicComments()->with('user')->get();
+        // Requesters only see public comments (with their attachments)
+        $comments = $ticket->publicComments()->with(['user', 'attachments'])->get();
 
         return view('requester.tickets.show', compact('ticket', 'comments'));
     }
@@ -86,7 +86,8 @@ class TicketController extends Controller
             $ticket,
             $request->user(),
             $request->validated('body'),
-            false // always public for requesters
+            false, // always public for requesters
+            $request->hasFile('attachments') ? $request->file('attachments') : []
         );
 
         return back()->with('success', 'Reply added.');

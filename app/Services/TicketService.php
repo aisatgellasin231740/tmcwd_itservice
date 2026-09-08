@@ -169,8 +169,11 @@ class TicketService
 
     /**
      * Add a comment. If requester replies on a resolved ticket, auto-reopen.
+     * Optionally store file attachments linked to this comment.
+     *
+     * @param  \Illuminate\Http\UploadedFile[]  $files
      */
-    public function addComment(Ticket $ticket, User $user, string $body, bool $isInternal = false): Comment
+    public function addComment(Ticket $ticket, User $user, string $body, bool $isInternal = false, array $files = []): Comment
     {
         // Auto-reopen if requester replies on resolved ticket
         if ($user->hasRole('requester') && $ticket->isResolved()) {
@@ -184,12 +187,31 @@ class TicketService
             'is_internal' => $isInternal,
         ]);
 
+        // Store any attached files linked to this comment
+        if (! empty($files)) {
+            foreach ($files as $file) {
+                $dir        = 'attachments/' . $ticket->id;
+                $uniqueName = uniqid() . '_' . $file->getClientOriginalName();
+                $storedPath = Storage::disk('local')->putFileAs($dir, $file, $uniqueName);
+
+                \App\Models\Attachment::create([
+                    'ticket_id'     => $ticket->id,
+                    'comment_id'    => $comment->id,
+                    'user_id'       => $user->id,
+                    'original_name' => $file->getClientOriginalName(),
+                    'stored_path'   => $storedPath,
+                    'mime_type'     => $file->getMimeType(),
+                    'size'          => $file->getSize(),
+                ]);
+            }
+        }
+
         if (! $isInternal) {
             TicketActivity::create([
                 'ticket_id'   => $ticket->id,
                 'user_id'     => $user->id,
                 'action'      => 'comment_added',
-                'description' => $user->name . ' added a reply',
+                'description' => $user->name . ' added a reply' . (! empty($files) ? ' with ' . count($files) . ' attachment(s)' : ''),
             ]);
 
             // Notify: if agent replied → notify requester; if requester replied → notify assignee

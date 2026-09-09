@@ -38,6 +38,35 @@ class TicketPolicy
         return $user->hasRole('it_head');
     }
 
+    /**
+     * Requester can edit their own ticket only while it is still "open".
+     * IT staff / head can always update via their own update policy.
+     */
+    public function editOwn(User $user, Ticket $ticket): bool
+    {
+        return $ticket->requester_id === $user->id
+            && $ticket->status === 'open';
+    }
+
+    /**
+     * Requester can cancel (withdraw) their own ticket only while it is still "open".
+     */
+    public function cancel(User $user, Ticket $ticket): bool
+    {
+        return $ticket->requester_id === $user->id
+            && $ticket->status === 'open';
+    }
+
+    /**
+     * Requester can explicitly reopen their own ticket only when it is Resolved.
+     * Closed tickets cannot be reopened — the requester must submit a new ticket.
+     */
+    public function reopen(User $user, Ticket $ticket): bool
+    {
+        return $ticket->requester_id === $user->id
+            && $ticket->status === 'resolved';
+    }
+
     /** Requesters can comment only on their own tickets; agents/admins on all */
     public function addComment(User $user, Ticket $ticket): bool
     {
@@ -58,6 +87,19 @@ class TicketPolicy
     public function assign(User $user, Ticket $ticket): bool
     {
         return $user->hasAnyRole(['it_head', 'it_staff']);
+    }
+
+    /**
+     * IT Staff can reassign a ticket that is currently assigned to them.
+     * IT Head can always reassign any ticket.
+     */
+    public function reassign(User $user, Ticket $ticket): bool
+    {
+        if ($user->hasRole('it_head')) {
+            return true;
+        }
+        // IT Staff: only tickets currently assigned to themselves
+        return $user->hasRole('it_staff') && $ticket->assigned_to === $user->id;
     }
 
     /** Only agents and admins can change ticket status */

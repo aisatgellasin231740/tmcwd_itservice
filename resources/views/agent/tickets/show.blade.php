@@ -194,6 +194,43 @@
                 </div>
                 @endif
                 @endif
+
+                {{-- Reassign — available to IT Staff who own this ticket, and IT Head --}}
+                @can('reassign', $ticket)
+                <div class="border-t border-gray-100 pt-3">
+                    <p class="form-label mb-1.5">Reassign to Another Staff Member</p>
+                    <form method="POST" action="{{ route('agent.tickets.reassign', $ticket) }}"
+                          x-data="{ open: false }">
+                        @csrf
+                        <button type="button" @click="open = !open"
+                                class="btn-secondary btn-sm w-full justify-center mb-2">
+                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                            Reassign Ticket
+                        </button>
+                        <div x-show="open" x-cloak class="space-y-2">
+                            <select name="assigned_to" class="form-select w-full">
+                                <option value="">Select staff member...</option>
+                                @foreach($agents->where('id', '!=', auth()->id()) as $agent)
+                                    <option value="{{ $agent->id }}">
+                                        {{ $agent->name }}
+                                        @if($agent->hasRole('it_head')) (IT Head) @else (IT Staff) @endif
+                                        @if($ticket->assigned_to === $agent->id) — Currently Assigned @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('assigned_to')
+                                <p class="form-error">{{ $message }}</p>
+                            @enderror
+                            <button type="submit" class="btn-primary btn-sm w-full justify-center">
+                                Confirm Reassign
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                @endcan
             </div>
         </div>
 

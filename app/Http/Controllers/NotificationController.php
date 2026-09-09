@@ -23,7 +23,28 @@ class NotificationController extends Controller
         $notification = $request->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
 
-        return back();
+        // Derive a redirect URL from the notification payload if possible.
+        // Notifications store ticket_id but no url key, so we resolve by role.
+        $data     = $notification->data;
+        $ticketId = $data['ticket_id'] ?? null;
+        $redirect = null;
+
+        if ($ticketId) {
+            $user = $request->user();
+            try {
+                if ($user->hasRole('it_head')) {
+                    $redirect = route('admin.tickets.show', $ticketId);
+                } elseif ($user->hasRole('it_staff')) {
+                    $redirect = route('agent.tickets.show', $ticketId);
+                } else {
+                    $redirect = route('requester.tickets.show', $ticketId);
+                }
+            } catch (\Exception) {
+                $redirect = null;
+            }
+        }
+
+        return $redirect ? redirect($redirect) : back();
     }
 
     public function markAllRead(Request $request)

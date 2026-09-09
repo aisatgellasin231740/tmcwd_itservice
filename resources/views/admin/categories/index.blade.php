@@ -4,6 +4,15 @@
 @section('content')
 <div class="mb-6"><h1 class="text-2xl font-bold text-gray-900">Ticket Categories</h1></div>
 
+@if(session('error'))
+<div class="mb-4 flex items-center gap-2.5 px-3 py-2.5 bg-red-50 border border-red-200 text-red-800 rounded-xl text-xs shadow-sm">
+    <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <span>{{ session('error') }}</span>
+</div>
+@endif
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="table-wrapper">
         <table class="data-table">
@@ -21,8 +30,19 @@
                         @endif
                     </td>
                     <td>
-                        <button onclick="editCat({{ $cat->id }}, '{{ addslashes($cat->name) }}', {{ $cat->is_active ? 1 : 0 }})"
-                                class="btn-secondary btn-sm">Edit</button>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="editCat({{ $cat->id }}, '{{ addslashes($cat->name) }}', {{ $cat->is_active ? 1 : 0 }})"
+                                    class="btn-secondary btn-sm">Edit</button>
+                            <form method="POST" action="{{ route('admin.categories.destroy', $cat) }}"
+                                  onsubmit="return confirm('Delete \'{{ addslashes($cat->name) }}\'?\n\nExisting tickets will keep this category label but it will be removed from new ticket dropdowns.')">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-lg
+                                               border border-red-200 text-red-600 bg-white hover:bg-red-50 transition-colors">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @endforeach

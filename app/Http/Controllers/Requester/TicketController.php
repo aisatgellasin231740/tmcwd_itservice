@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Requester;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RequesterUpdateTicketRequest;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\StoreTicketRequest;
 use App\Models\Category;
 use App\Models\Department;
 use App\Models\Priority;
 use App\Models\Ticket;
+use App\Models\TicketActivity;
 use App\Services\TicketService;
 use Illuminate\Http\Request;
 
@@ -91,5 +93,83 @@ class TicketController extends Controller
         );
 
         return back()->with('success', 'Reply added.');
+    }
+
+    // ── Requester edit (open tickets only) ─────────────────────────────────
+
+    public function edit(Request $request, Ticket $ticket)
+    {
+        $this->authorize('editOwn', $ticket);
+
+        $categories = Category::active()->orderBy('name')->get();
+
+        return view('requester.tickets.edit', compact('ticket', 'categories'));
+    }
+
+    public function update(RequesterUpdateTicketRequest $request, Ticket $ticket)
+    {
+        $this->authorize('editOwn', $ticket);
+
+        $old = $ticket->only(['title', 'description', 'category_id']);
+
+        $ticket->update($request->validated());
+        $ticket->refresh();
+
+        // Log each changed field
+        $changed = [];
+        if ($old['title'] !== $ticket->title)               $changed[] = 'title';
+        if ($old['description'] !== $ticket->description)   $changed[] = 'description';
+        if ($old['category_id'] !== $ticket->category_id)   $changed[] = 'category';
+
+        if ($changed) {
+            TicketActivity::create([
+                'ticket_id'   => $ticket->id,
+                'user_id'     => $request->user()->id,
+                'action'      => 'edited',
+                'description' => $request->user()->name . ' edited ticket (' . implode(', ', $changed) . ')',
+            ]);
+        }
+
+        return redirect()
+            ->route('requester.tickets.show', $ticket)
+            ->with('success', 'Ticket updated successfully.');
+    }
+
+    // ── Requester cancel/withdraw (open tickets only) ──────────────────────
+
+    public function cancel(Request $request, Ticket $ticket)
+    {
+        $this->authorize('cancel', $ticket);
+
+        $this->ticketService->updateStatus($ticket, 'closed', $request->user());
+
+        // Override the activity description to say "withdrawn" instead of status change
+        TicketActivity::where('ticket_id', $ticket->id)
+            ->where('action', 'status_changed')
+            ->latest()
+            ->first()
+            ?->update(['description' => $request->user()->name . ' withdrew (cancelled) this ticket.']);
+
+        return redirect()
+            ->route('requester.tickets.index')
+            ->with('success', "Ticket {$ticket->ticket_number} has been withdrawn.");
+    }
+
+    // ── Requester explicit reopen (resolved tickets only) ──────────────────
+
+    public function reopen(Request $request, Ticket $ticket)
+    {
+        $this->authorize('reopen', $ticket);
+
+        $request->validate([
+            'reopen_reason' => ['required', 'string', 'min:10', 'max:1000'],
+        ], [
+            'reopen_reason.required' => 'Please explain why this ticket was not resolved.',
+            'reopen_reason.min'      => 'Please provide at least 10 characters.',
+        ]);
+
+        $this->ticketService->reopen($ticket, $request->user(), $request->input('reopen_reason'));
+
+        return back()->with('success', 'Ticket has been reopened. The IT team will follow up.');
     }
 }

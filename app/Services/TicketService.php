@@ -140,6 +140,47 @@ class TicketService
         });
     }
 
+    /**
+     * Explicit requester reopen with a mandatory reason.
+     *
+     * Sets status back to 'open', clears resolved/closed timestamps,
+     * logs a dedicated 'reopened' activity entry, and posts the reason
+     * as a public comment so IT staff can see it in the conversation thread.
+     */
+    public function reopen(Ticket $ticket, User $requester, string $reason): void
+    {
+        DB::transaction(function () use ($ticket, $requester, $reason) {
+            // Clear resolution state
+            $ticket->status      = 'open';
+            $ticket->resolved_at = null;
+            $ticket->closed_at   = null;
+            $ticket->save();
+
+            // Dedicated activity log entry
+            TicketActivity::create([
+                'ticket_id'   => $ticket->id,
+                'user_id'     => $requester->id,
+                'action'      => 'reopened',
+                'old_value'   => 'resolved',
+                'new_value'   => 'open',
+                'description' => $requester->name . ' marked this ticket as not resolved and requested it to be reopened.',
+            ]);
+
+            // Post the reason as a visible public comment
+            Comment::create([
+                'ticket_id'   => $ticket->id,
+                'user_id'     => $requester->id,
+                'body'        => '🔁 **Reopen reason:** ' . $reason,
+                'is_internal' => false,
+            ]);
+
+            // Notify the assignee (if any) that the ticket has been reopened
+            if ($ticket->assigned_to) {
+                $ticket->assignee?->notify(new TicketStatusUpdated($ticket, 'resolved', 'open'));
+            }
+        });
+    }
+
     // ── Assignment ─────────────────────────────────────────────
 
     public function assign(Ticket $ticket, ?int $agentId, User $actor): void
@@ -163,6 +204,30 @@ class TicketService
         if ($newAgent && $newAgent->id !== $actor->id) {
             $newAgent->notify(new TicketAssigned($ticket));
         }
+    }
+
+    /**
+     * Staff-to-staff reassignment: actor must currently own the ticket.
+     * Logs a distinct "reassigned" activity and notifies the new assignee.
+     */
+    public function reassign(Ticket $ticket, int $newAgentId, User $actor): void
+    {
+        $fromName = $actor->name;
+        $toAgent  = User::findOrFail($newAgentId);
+
+        $ticket->assigned_to = $toAgent->id;
+        $ticket->save();
+
+        TicketActivity::create([
+            'ticket_id'   => $ticket->id,
+            'user_id'     => $actor->id,
+            'action'      => 'reassigned',
+            'old_value'   => $fromName,
+            'new_value'   => $toAgent->name,
+            'description' => "{$actor->name} reassigned ticket from {$fromName} to {$toAgent->name}",
+        ]);
+
+        $toAgent->notify(new TicketAssigned($ticket));
     }
 
     // ── Comments ───────────────────────────────────────────────

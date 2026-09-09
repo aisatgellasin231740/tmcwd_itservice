@@ -7,6 +7,15 @@
     <p class="text-sm text-gray-500 mt-1">Configure the resolution time targets for each priority level.</p>
 </div>
 
+@if(session('error'))
+<div class="mb-4 flex items-center gap-2.5 px-3 py-2.5 bg-red-50 border border-red-200 text-red-800 rounded-xl text-xs shadow-sm">
+    <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <span>{{ session('error') }}</span>
+</div>
+@endif
+
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
     @foreach($priorities as $priority)
     @php
@@ -47,6 +56,19 @@
                 </div>
                 <button type="submit" class="btn-primary btn-sm w-full justify-center">Save</button>
             </form>
+
+            {{-- Delete priority --}}
+            <div class="mt-3 pt-3 border-t border-gray-100">
+                <form method="POST" action="{{ route('admin.priorities.destroy', $priority) }}"
+                      onsubmit="return confirm('Delete the \'{{ addslashes($priority->name) }}\' priority?\n\nExisting tickets will keep this priority label but it will be removed from new ticket dropdowns.')">
+                    @csrf @method('DELETE')
+                    <button type="submit"
+                            class="w-full inline-flex justify-center items-center px-3 py-1.5 text-xs font-medium
+                                   rounded-lg border border-red-200 text-red-600 bg-white hover:bg-red-50 transition-colors">
+                        Delete Priority
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
     @endforeach

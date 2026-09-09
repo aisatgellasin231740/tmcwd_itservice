@@ -108,7 +108,31 @@
     .sla-met     { @apply text-green-700 bg-green-50 border border-green-200; }
 }
 
-/* ── Dark Mode overrides (plain CSS — no @apply to avoid circular deps) ─── */
+    /* Priority row tints — applied to <tr> in the Recent Requests table */
+    /* Urgent: strong red tint */
+    .priority-row-urgent td               { background-color: #fff1f2 !important; }
+    .priority-row-urgent:hover td         { background-color: #ffe4e6 !important; }
+    /* High: orange tint */
+    .priority-row-high td                 { background-color: #fff7ed !important; }
+    .priority-row-high:hover td           { background-color: #ffedd5 !important; }
+    /* Medium: subtle amber tint */
+    .priority-row-medium td               { background-color: #fefce8 !important; }
+    .priority-row-medium:hover td         { background-color: #fef9c3 !important; }
+    /* Low: no tint — inherits default white */
+
+    /* Dark mode priority row tints */
+    .dark .priority-row-urgent td         { background-color: #3b1219 !important; }
+    .dark .priority-row-urgent:hover td   { background-color: #4c1522 !important; }
+    .dark .priority-row-high td           { background-color: #2c1a08 !important; }
+    .dark .priority-row-high:hover td     { background-color: #3c220a !important; }
+    .dark .priority-row-medium td         { background-color: #1e1a05 !important; }
+    .dark .priority-row-medium:hover td   { background-color: #2a2408 !important; }
+
+    /* Keep link colour legible on tinted rows */
+    .priority-row-urgent td a.font-mono,
+    .priority-row-high td a.font-mono     { color: #1d4ed8; }
+    .dark .priority-row-urgent td a.font-mono,
+    .dark .priority-row-high td a.font-mono { color: #93c5fd; }
 .dark body                            { background-color: #111827; color: #f3f4f6; }
 .dark .card                           { background-color: #1f2937; border-color: #374151; }
 .dark .card-header                    { border-color: #374151; }

@@ -142,4 +142,31 @@ class TicketController extends Controller
 
         return back()->with('success', $isInternal ? 'Internal note added.' : 'Reply sent.');
     }
+
+    // ── Staff-to-staff reassignment ────────────────────────────────────────
+
+    public function reassign(Request $request, Ticket $ticket)
+    {
+        $this->authorize('reassign', $ticket);
+
+        $request->validate([
+            'assigned_to' => ['required', 'integer', 'exists:users,id', 'different:' . $ticket->assigned_to],
+        ], [
+            'assigned_to.different' => 'Please select a different staff member to reassign to.',
+        ]);
+
+        // Ensure target is an active IT staff / head
+        $target = User::whereIn('id', [$request->assigned_to])
+            ->role(['it_staff', 'it_head'])
+            ->where('is_active', true)
+            ->first();
+
+        if (! $target) {
+            return back()->withErrors(['assigned_to' => 'Selected user is not a valid IT staff member.']);
+        }
+
+        $this->ticketService->reassign($ticket, $target->id, $request->user());
+
+        return back()->with('success', "Ticket reassigned to {$target->name}.");
+    }
 }

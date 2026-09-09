@@ -149,14 +149,10 @@
                             flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
                     {{ auth()->user()->initials }}
                 </div>
-                {{-- Name + Role --}}
+                {{-- Name only (role label moved into the dropdown) --}}
                 <div class="hidden sm:block text-left">
                     <p class="text-white text-sm font-semibold leading-tight truncate max-w-[110px]">
                         {{ auth()->user()->name }}
-                    </p>
-                    <p class="text-blue-200 text-[11px] leading-tight">
-                        @php $r = auth()->user()->roles->first()?->name ?? '' @endphp
-                        {{ match($r) { 'it_head' => 'IT Head', 'it_staff' => 'IT Staff', default => 'Employee' } }}
                     </p>
                 </div>
                 <svg class="w-4 h-4 text-blue-300 hidden sm:block"
@@ -178,6 +174,10 @@
                         <div class="min-w-0">
                             <p class="text-white text-sm font-semibold truncate">{{ auth()->user()->name }}</p>
                             <p class="text-blue-200 text-[10px] truncate">{{ auth()->user()->email }}</p>
+                            @php $r = auth()->user()->roles->first()?->name ?? '' @endphp
+                            <p class="text-blue-300 text-[10px] truncate font-medium">
+                                {{ match($r) { 'it_head' => 'IT Head', 'it_staff' => 'IT Staff', default => 'Employee' } }}
+                            </p>
                         </div>
                     </div>
                 </div>

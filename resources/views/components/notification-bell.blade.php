@@ -32,27 +32,30 @@
 
         @forelse ($notifications as $n)
             @php $data = $n->data; @endphp
-            <a href="{{ route('notifications.read', $n->id) }}"
-               class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 border-b border-gray-50 text-sm
-                      {{ $n->read_at ? 'opacity-60' : '' }}">
-                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                    @if(($data['type'] ?? '') === 'urgent_alert')
-                        <span class="text-base">⚠️</span>
-                    @else
-                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                        </svg>
-                    @endif
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-gray-800 leading-snug">{{ $data['message'] ?? 'Notification' }}</p>
-                    <p class="text-gray-400 text-xs mt-0.5">{{ $n->created_at->diffForHumans() }}</p>
-                </div>
-                @unless($n->read_at)
-                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-1.5 shrink-0"></div>
-                @endunless
-            </a>
+            <form method="POST" action="{{ route('notifications.read', $n->id) }}" class="block border-b border-gray-50">
+                @csrf
+                <button type="submit"
+                        class="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-left
+                               {{ $n->read_at ? 'opacity-60' : '' }}">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                        @if(($data['type'] ?? '') === 'urgent_alert')
+                            <span class="text-base">⚠️</span>
+                        @else
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        @endif
+                    </div>
+                    <div class="flex-1 min-w-0 text-left">
+                        <p class="text-gray-800 leading-snug">{{ $data['message'] ?? 'Notification' }}</p>
+                        <p class="text-gray-400 text-xs mt-0.5">{{ $n->created_at->diffForHumans() }}</p>
+                    </div>
+                    @unless($n->read_at)
+                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-1.5 shrink-0"></div>
+                    @endunless
+                </button>
+            </form>
         @empty
             <div class="px-4 py-6 text-center text-sm text-gray-400">No notifications yet.</div>
         @endforelse

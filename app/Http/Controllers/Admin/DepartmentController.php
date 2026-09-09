@@ -33,4 +33,23 @@ class DepartmentController extends Controller
 
         return back()->with('success', 'Department updated.');
     }
+
+    public function destroy(Department $department)
+    {
+        // Block if any open/active tickets are still assigned to this department
+        $openCount = $department->tickets()
+            ->whereNotIn('status', ['resolved', 'closed'])
+            ->count();
+
+        if ($openCount > 0) {
+            return back()->with('error',
+                "Cannot delete \"{$department->name}\" — it has {$openCount} open ticket(s). " .
+                "Resolve or close them first, or reassign them to another department."
+            );
+        }
+
+        $department->delete(); // soft-delete
+
+        return back()->with('success', "\"{$department->name}\" has been deleted.");
+    }
 }

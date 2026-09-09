@@ -32,11 +32,15 @@ Route::middleware(['auth', 'verified', 'active', 'force.password'])->group(funct
          ->middleware('role:requester|it_staff|it_head');
 
     Route::prefix('tickets')->name('requester.tickets.')->middleware('role:requester|it_staff|it_head')->group(function () {
-        Route::get('/',                   [Requester\TicketController::class, 'index'])->name('index');
-        Route::get('/create',             [Requester\TicketController::class, 'create'])->name('create');
-        Route::post('/',                  [Requester\TicketController::class, 'store'])->name('store');
-        Route::get('/{ticket}',           [Requester\TicketController::class, 'show'])->name('show');
-        Route::post('/{ticket}/comments', [Requester\TicketController::class, 'storeComment'])->name('comments.store');
+        Route::get('/',                        [Requester\TicketController::class, 'index'])->name('index');
+        Route::get('/create',                  [Requester\TicketController::class, 'create'])->name('create');
+        Route::post('/',                       [Requester\TicketController::class, 'store'])->name('store');
+        Route::get('/{ticket}',                [Requester\TicketController::class, 'show'])->name('show');
+        Route::get('/{ticket}/edit',           [Requester\TicketController::class, 'edit'])->name('edit');
+        Route::patch('/{ticket}',              [Requester\TicketController::class, 'update'])->name('update');
+        Route::post('/{ticket}/cancel',        [Requester\TicketController::class, 'cancel'])->name('cancel');
+        Route::post('/{ticket}/reopen',        [Requester\TicketController::class, 'reopen'])->name('reopen');
+        Route::post('/{ticket}/comments',      [Requester\TicketController::class, 'storeComment'])->name('comments.store');
     });
 
     // ── IT Staff routes (URL prefix stays /agent/ for backwards compat) ───
@@ -47,6 +51,7 @@ Route::middleware(['auth', 'verified', 'active', 'force.password'])->group(funct
             Route::get('/',                   [Agent\TicketController::class, 'index'])->name('index');
             Route::get('/{ticket}',           [Agent\TicketController::class, 'show'])->name('show');
             Route::patch('/{ticket}',         [Agent\TicketController::class, 'update'])->name('update');
+            Route::post('/{ticket}/reassign', [Agent\TicketController::class, 'reassign'])->name('reassign');
             Route::post('/{ticket}/comments', [Agent\TicketController::class, 'storeComment'])->name('comments.store');
         });
     });
@@ -72,15 +77,18 @@ Route::middleware(['auth', 'verified', 'active', 'force.password'])->group(funct
         Route::get('/departments',              [Admin\DepartmentController::class, 'index'])->name('departments.index');
         Route::post('/departments',             [Admin\DepartmentController::class, 'store'])->name('departments.store');
         Route::put('/departments/{department}', [Admin\DepartmentController::class, 'update'])->name('departments.update');
+        Route::delete('/departments/{department}', [Admin\DepartmentController::class, 'destroy'])->name('departments.destroy');
 
         // Categories
         Route::get('/categories',             [Admin\CategoryController::class, 'index'])->name('categories.index');
         Route::post('/categories',            [Admin\CategoryController::class, 'store'])->name('categories.store');
         Route::put('/categories/{category}',  [Admin\CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/categories/{category}', [Admin\CategoryController::class, 'destroy'])->name('categories.destroy');
 
         // Priorities / SLA
         Route::get('/priorities',            [Admin\PriorityController::class, 'index'])->name('priorities.index');
         Route::put('/priorities/{priority}', [Admin\PriorityController::class, 'update'])->name('priorities.update');
+        Route::delete('/priorities/{priority}', [Admin\PriorityController::class, 'destroy'])->name('priorities.destroy');
 
         // Reports
         Route::get('/reports',            [Admin\ReportController::class, 'index'])->name('reports.index');

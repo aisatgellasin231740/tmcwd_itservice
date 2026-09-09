@@ -33,4 +33,22 @@ class CategoryController extends Controller
 
         return back()->with('success', 'Category updated.');
     }
+
+    public function destroy(Category $category)
+    {
+        $openCount = $category->tickets()
+            ->whereNotIn('status', ['resolved', 'closed'])
+            ->count();
+
+        if ($openCount > 0) {
+            return back()->with('error',
+                "Cannot delete \"{$category->name}\" — it has {$openCount} open ticket(s). " .
+                "Resolve or close them first."
+            );
+        }
+
+        $category->delete();
+
+        return back()->with('success', "\"{$category->name}\" has been deleted.");
+    }
 }

@@ -25,4 +25,22 @@ class PriorityController extends Controller
 
         return back()->with('success', "{$priority->name} SLA settings updated.");
     }
+
+    public function destroy(Priority $priority)
+    {
+        $openCount = $priority->tickets()
+            ->whereNotIn('status', ['resolved', 'closed'])
+            ->count();
+
+        if ($openCount > 0) {
+            return back()->with('error',
+                "Cannot delete the \"{$priority->name}\" priority — it has {$openCount} open ticket(s). " .
+                "Resolve or close them first."
+            );
+        }
+
+        $priority->delete();
+
+        return back()->with('success', "\"{$priority->name}\" priority has been deleted.");
+    }
 }

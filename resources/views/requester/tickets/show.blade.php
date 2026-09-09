@@ -19,6 +19,36 @@
             </div>
             <h1 class="text-2xl font-bold text-gray-900">{{ $ticket->title }}</h1>
         </div>
+        {{-- Requester actions — only while Open --}}
+        @can('editOwn', $ticket)
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="{{ route('requester.tickets.edit', $ticket) }}"
+               class="btn-secondary btn-sm flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Edit
+            </a>
+            <form method="POST" action="{{ route('requester.tickets.cancel', $ticket) }}"
+                  x-data
+                  @submit.prevent="
+                    if (confirm('Withdraw this ticket? It will be marked closed and cannot be reopened from this action.'))
+                        $el.submit()
+                  ">
+                @csrf
+                <button type="submit"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
+                               border border-red-200 text-red-600 bg-white hover:bg-red-50 transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Withdraw
+                </button>
+            </form>
+        </div>
+        @endcan
     </div>
 </div>
 
@@ -83,6 +113,51 @@
             {{-- Reply form --}}
             @if(!$ticket->isClosed())
             <div class="px-6 pb-6 pt-2 border-t border-gray-100">
+                {{-- ── Reopen banner (resolved tickets only) ───────────────── --}}
+                @can('reopen', $ticket)
+                <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3"
+                     x-data="{ showForm: false }">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-semibold text-amber-800">This ticket has been marked as resolved.</p>
+                            <p class="text-xs text-amber-700 mt-0.5">If your issue is not fixed, you can request it to be reopened.</p>
+                        </div>
+                        <button type="button" @click="showForm = !showForm"
+                                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
+                                       border border-amber-400 text-amber-800 bg-white hover:bg-amber-100 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Not Resolved? Reopen
+                        </button>
+                    </div>
+
+                    <form method="POST" action="{{ route('requester.tickets.reopen', $ticket) }}"
+                          x-show="showForm" x-cloak class="mt-3 space-y-2">
+                        @csrf
+                        <label for="reopen_reason" class="block text-xs font-medium text-amber-900">
+                            Please explain why this issue is not resolved <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="reopen_reason" name="reopen_reason" rows="3"
+                                  placeholder="e.g. The printer still shows the same error after the fix applied..."
+                                  class="form-textarea text-sm @error('reopen_reason') border-red-400 @enderror">{{ old('reopen_reason') }}</textarea>
+                        @error('reopen_reason')
+                            <p class="form-error">{{ $message }}</p>
+                        @enderror
+                        <div class="flex gap-2">
+                            <button type="submit"
+                                    class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg
+                                           bg-amber-600 hover:bg-amber-700 text-white transition-colors">
+                                Submit Reopen Request
+                            </button>
+                            <button type="button" @click="showForm = false"
+                                    class="btn-secondary btn-sm">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                @endcan
+
                 <form method="POST" action="{{ route('requester.tickets.comments.store', $ticket) }}"
                       enctype="multipart/form-data">
                     @csrf

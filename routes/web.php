@@ -16,10 +16,10 @@ Route::get('/dashboard', function () {
     if ($user?->hasRole('it_head'))  return redirect()->route('admin.dashboard');
     if ($user?->hasRole('it_staff')) return redirect()->route('agent.dashboard');
     return redirect()->route('requester.dashboard');
-})->middleware(['auth', 'active'])->name('dashboard');
+})->middleware(['auth', 'active', 'force.password'])->name('dashboard');
 
 // ── Authenticated routes ───────────────────────────────────────────────────
-Route::middleware(['auth', 'verified', 'active'])->group(function () {
+Route::middleware(['auth', 'verified', 'active', 'force.password'])->group(function () {
 
     // ── Profile ────────────────────────────────────────────────────────────
     Route::get('/profile',          [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');

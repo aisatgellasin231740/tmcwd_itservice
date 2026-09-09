@@ -11,7 +11,7 @@
             $greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
         @endphp
         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {{ $greeting }}, {{ auth()->user()->name }} 👋
+            {{ $greeting }}, {{ auth()->user()->name }}
         </h1>
         <p class="text-sm text-gray-500 mt-0.5">{{ now()->format('l, F j, Y') }}</p>
 

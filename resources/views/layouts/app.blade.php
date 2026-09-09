@@ -457,6 +457,46 @@
 @stack('scripts')
 <script>
 function globalSearch() { return { open: false }; }
+
+// ── Auto-submit filter forms ───────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form[data-auto-filter]').forEach(function (form) {
+
+        // Show a subtle loading state on the form when submitting
+        function submitForm() {
+            form.querySelectorAll('select, input[type="date"]').forEach(function(el) {
+                el.disabled = true;
+            });
+            // Add a small spinner next to the filter button if present
+            var btn = form.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.innerHTML = '<svg class="animate-spin w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Filtering…';
+                btn.disabled = true;
+            }
+            form.submit();
+        }
+
+        // Selects and date inputs — submit immediately on change
+        form.querySelectorAll('select, input[type="date"]').forEach(function (el) {
+            el.addEventListener('change', submitForm);
+        });
+
+        // Text inputs — debounced 600ms
+        form.querySelectorAll('input[type="text"], input[type="search"]').forEach(function (el) {
+            var timer;
+            el.addEventListener('input', function () {
+                clearTimeout(timer);
+                timer = setTimeout(submitForm, 600);
+            });
+        });
+
+        // Hide the Filter button visually (keep it for JS-disabled fallback)
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn && (btn.textContent.trim() === 'Filter' || btn.textContent.trim() === 'Apply')) {
+            btn.classList.add('hidden');
+        }
+    });
+});
 </script>
 
 {{-- ── MOBILE BOTTOM NAV (visible only on small screens, hidden on lg+) ── --}}

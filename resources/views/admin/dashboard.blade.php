@@ -66,7 +66,7 @@
         @endforeach
 
         <div x-show="showCustom" x-cloak class="flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
-            <form method="GET" action="{{ route('admin.dashboard') }}" class="flex gap-2 items-end flex-wrap">
+            <form method="GET" action="{{ route('admin.dashboard') }}" class="flex gap-2 items-end flex-wrap" data-auto-filter>
                 <input type="hidden" name="period" value="custom">
                 <div>
                     <label class="form-label text-xs">From</label>

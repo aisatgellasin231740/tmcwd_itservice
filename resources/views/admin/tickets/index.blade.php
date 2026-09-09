@@ -9,7 +9,7 @@
 {{-- Filters --}}
 <div class="card mb-4">
     <div class="card-body py-3">
-        <form method="GET" class="flex flex-wrap gap-3 items-end">
+        <form method="GET" class="flex flex-wrap gap-3 items-end" data-auto-filter>
             <div>
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select w-36">

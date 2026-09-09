@@ -20,7 +20,7 @@
 {{-- Filters --}}
 <div class="card mb-5">
     <div class="card-body py-3">
-        <form method="GET" class="flex flex-wrap gap-3 items-end">
+        <form method="GET" class="flex flex-wrap gap-3 items-end" data-auto-filter>
             <div>
                 <label class="form-label">From</label>
                 <input type="date" name="date_from" value="{{ $dateFrom }}" class="form-input">

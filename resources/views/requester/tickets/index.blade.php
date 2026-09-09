@@ -15,7 +15,7 @@
 {{-- Filters --}}
 <div class="card mb-5">
     <div class="card-body">
-        <form method="GET" class="flex flex-wrap gap-3 items-end">
+        <form method="GET" class="flex flex-wrap gap-3 items-end" data-auto-filter>
             <div>
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select w-36">
